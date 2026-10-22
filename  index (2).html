@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html font-sans lang="my">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello Movie - ဗီဒီယိုကြည့်ရှုရန်</title>
+  
+  <!-- Tailwind CSS CDN Stylesheet -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  
+  <!-- Google Fonts: Padauk & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: 'Padauk', 'Plus Jakarta Sans', sans-serif;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+
+    /* Splash Progress Animation */
+    @keyframes progressAnim {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+    .animate-loading {
+      animation: progressAnim 5s linear forwards;
+    }
+
+    /* Floating effect for 3D elements */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+    }
+    .float-item {
+      animation: floatSlow 4s ease-in-out infinite;
+    }
+
+    /* Force Success Popup Box Green Color Fix */
+    .force-success-bg {
+      background-color: #059669 !important;
+      color: #ffffff !important;
+    }
+  </style>
+  
+  <!-- YouTube Iframe Player API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body class="bg-gray-900 font-sans antialiased text-gray-800 min-h-screen flex items-center justify-center p-0 md:p-4 selection:bg-cyan-500 selection:text-white">
+
+  <!-- Mobile Frame Emulator Outer -->
+  <div class="relative w-full max-w-md h-screen md:h-[844px] bg-gray-100 md:rounded-3xl shadow-2xl overflow-hidden flex flex-col border-0 md:border-8 border-gray-800">
+
+    <!-- ================= 1. SPLASH SCREEN (5 SECONDS) ================= -->
+    <div id="splash-screen" class="absolute inset-0 z-50 bg-gradient-to-b from-blue-50 via-indigo-50 to-blue-100 flex flex-col items-center justify-between py-12 px-6 transition-opacity duration-700">
+      <div></div>
+
+      <!-- Main Logo & Graphic Group -->
+      <div class="flex flex-col items-center text-center w-full max-w-xs">
+        <div class="relative mb-3 float-item">
+          <div class="w-24 h-20 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-2xl shadow-xl flex items-center justify-center transform -rotate-6 relative overflow-hidden">
+            <i class="fa-solid fa-play text-white text-3xl ml-1"></i>
+          </div>
+        </div>
+
+        <h1 class="text-3xl font-extrabold text-indigo-900 tracking-tight leading-none mb-1">
+          Hello<span class="text-indigo-600">Movie</span>
+        </h1>
+        <p class="text-xs font-bold text-indigo-500 tracking-wide mb-8">
+          ဗီဒီယိုများကို အလွယ်တကူ ကြည့်ရှုပါ
+        </p>
+
+        <div class="relative w-48 h-32 flex items-center justify-center my-2">
+          <i class="fa-solid fa-film text-indigo-500 text-3xl animate-bounce"></i>
+        </div>
+      </div>
+
+      <!-- Loading Bar -->
+      <div class="w-full max-w-xs text-center mb-6">
+        <p class="text-xs font-bold text-gray-400 mb-2">ခဏစောင့်ပါ...</p>
+        <div class="w-full bg-indigo-100 h-2.5 rounded-full overflow-hidden p-0.5">
+          <div class="bg-gradient-to-r from-cyan-400 to-indigo-600 h-full rounded-full animate-loading"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= 2. MAIN APP SCREEN ================= -->
+    <div id="main-app" class="flex-1 flex flex-col h-full overflow-y-auto bg-gray-50 opacity-0 transition-opacity duration-500">
+      
+      <!-- TOP HEADER BAR -->
+      <header class="sticky top-0 z-30 bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 shadow-sm">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+            <i class="fa-solid fa-play text-xs"></i>
+          </div>
+          <h2 class="text-base font-extrabold text-indigo-950">
+            Hello<span class="text-indigo-600">Movie</span>
+          </h2>
+        </div>
+
+        <!-- Header Right Side: Diamond Display & Bag Icon -->
+        <div class="flex items-center space-x-2">
+          
+          <!-- Diamond Display Box -->
+          <div class="flex items-center space-x-1.5 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl shadow-sm">
+            <i class="fa-solid fa-gem text-cyan-500 text-xs"></i>
+            <span id="diamond-count" class="text-xs font-extrabold text-blue-900">0</span>
+          </div>
+
+          <!-- Bag Icon ခလုတ် -->
+          <div class="relative">
+            <button id="bag-menu-btn" class="w-9 h-9 rounded-xl border-2 border-blue-500 text-blue-600 bg-blue-50 flex items-center justify-center shadow-sm hover:bg-blue-100 transition focus:outline-none" title="မီနူး">
+              <i class="fa-solid fa-bag-shopping text-sm"></i>
+            </button>
+
+            <!-- Dropdown Menu for Bag Icon -->
+            <div id="bag-dropdown" class="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-xl shadow-xl hidden z-40 py-1.5">
+              <button id="menu-withdraw" class="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 flex items-center space-x-2">
+                <i class="fa-solid fa-wallet text-blue-500 w-4"></i>
+                <span>ငွေထုတ်ရန်</span>
+              </button>
+              <button id="menu-history" class="w-full text-left px-3 py-2 text-xs font-bold text-gray-700 hover:bg-amber-50 hover:text-amber-600 flex items-center space-x-2 border-t border-gray-100">
+                <i class="fa-solid fa-clock-rotate-left text-amber-500 w-4"></i>
+                <span>မှတ်တမ်း</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <main class="flex-1 px-4 py-3 space-y-4">
+
+        <!-- FEATURED VIDEO PLAYER -->
+        <section class="relative">
+          <div class="relative w-full rounded-2xl overflow-hidden bg-black h-64 shadow-md">
+            <div id="yt-player" class="w-full h-full"></div>
+          </div>
+          <div class="mt-2 flex items-center justify-between">
+            <div>
+              <h3 id="current-title" class="font-bold text-sm text-gray-800">ဇာတ်ကား (၁)</h3>
+              <p id="current-meta" class="text-xs text-gray-500">YouTube Movie &bull; ကြည့်ရှုနေဆဲ</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- MOVIE GRID (21 Movies) -->
+        <section class="space-y-2">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-indigo-950 text-sm">ရုပ်ရှင်ဇာတ်ကားများ (၂၁ ခု)</h3>
+            <span class="text-xs font-bold text-indigo-600">အားလုံးကြည့်ရှုနိုင်သည်</span>
+          </div>
+
+          <div id="movie-grid" class="grid grid-cols-2 gap-2.5 pb-4">
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="dEwBGMjk4ec" data-title="ဇာတ်ကား (၁)">
+              <img src="https://img.youtube.com/vi/dEwBGMjk4ec/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၁)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၁)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="LTOXVTWZ9iY" data-title="ဇာတ်ကား (၂)">
+              <img src="https://img.youtube.com/vi/LTOXVTWZ9iY/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၂)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၂)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="Nxla9CC_lYs" data-title="ဇာတ်ကား (၃)">
+              <img src="https://img.youtube.com/vi/Nxla9CC_lYs/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၃)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၃)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="g0HyY5mrFUM" data-title="ဇာတ်ကား (၄)">
+              <img src="https://img.youtube.com/vi/g0HyY5mrFUM/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၄)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၄)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="hE3RssbkSAA" data-title="ဇာတ်ကား (၅)">
+              <img src="https://img.youtube.com/vi/hE3RssbkSAA/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၅)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၅)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="3VXzmV4zo6E" data-title="ဇာတ်ကား (၆)">
+              <img src="https://img.youtube.com/vi/3VXzmV4zo6E/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၆)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၆)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="YaLfdnokBAw" data-title="ဇာတ်ကား (၇)">
+              <img src="https://img.youtube.com/vi/YaLfdnokBAw/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၇)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၇)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="kdH4ZKOxMno" data-title="ဇာတ်ကား (၈)">
+              <img src="https://img.youtube.com/vi/kdH4ZKOxMno/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၈)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၈)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="R9uFSaOU6k4" data-title="ဇာတ်ကား (၉)">
+              <img src="https://img.youtube.com/vi/R9uFSaOU6k4/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၉)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၉)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="70x4nTdTOoA" data-title="ဇာတ်ကား (၁၀)">
+              <img src="https://img.youtube.com/vi/70x4nTdTOoA/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၁၀)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၁၀)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="tCl2F_TFxt0" data-title="ဇာတ်ကား (၁၁)">
+              <img src="https://img.youtube.com/vi/tCl2F_TFxt0/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၁၁)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၁၁)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="MWwa0JHIoaY" data-title="ဇာတ်ကား (၁၂)">
+              <img src="https://img.youtube.com/vi/MWwa0JHIoaY/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၁၂)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၁၂)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="ixoy6hvp_IE" data-title="ဇာတ်ကား (၁၃)">
+              <img src="https://img.youtube.com/vi/ixoy6hvp_IE/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၁၃)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၁၃)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="1KR8K4-K5eA" data-title="ဇာတ်ကား (၁၄)">
+              <img src="https://img.youtube.com/vi/1KR8K4-K5eA/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၁၄)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၁၄)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="9E55GVRs7KM" data-title="ဇာတ်ကား (၁၅)">
+              <img src="https://img.youtube.com/vi/9E55GVRs7KM/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၁၅)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၁၅)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="qhd6zqfni9M" data-title="ဇာတ်ကား (၁၆)">
+              <img src="https://img.youtube.com/vi/qhd6zqfni9M/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၁၆)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၁၆)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="mUbmyxVe0Yg" data-title="ဇာတ်ကား (၁၇)">
+              <img src="https://img.youtube.com/vi/mUbmyxVe0Yg/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၁၇)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၁၇)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="-1lT8vA1Fyw" data-title="ဇာတ်ကား (၁၈)">
+              <img src="https://img.youtube.com/vi/-1lT8vA1Fyw/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၁၈)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၁၈)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="VaYtC3kl-F4" data-title="ဇာတ်ကား (၁၉)">
+              <img src="https://img.youtube.com/vi/VaYtC3kl-F4/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၁၉)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၁၉)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="S-AeyX9iKIw" data-title="ဇာတ်ကား (၂၀)">
+              <img src="https://img.youtube.com/vi/S-AeyX9iKIw/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၂၀)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၂၀)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+            <div class="movie-card bg-white rounded-xl p-2 shadow-sm border border-gray-100 cursor-pointer hover:shadow transition" data-id="V-e32xpK8Js" data-title="ဇာတ်ကား (၂၁)">
+              <img src="https://img.youtube.com/vi/V-e32xpK8Js/hqdefault.jpg" class="w-full rounded-lg aspect-video object-cover" alt="ဇာတ်ကား (၂၁)">
+              <h4 class="font-bold text-xs text-gray-800 mt-1.5 truncate">ဇာတ်ကား (၂၁)</h4>
+              <p class="text-[10px] text-gray-400">YouTube Movie</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <footer class="bg-white border-t border-gray-200 px-6 py-2 text-center text-gray-400 text-xs font-bold">
+        <span>Hello Movie App &bull; ရုပ်ရှင်များ ကြည့်ရှုရန်</span>
+      </footer>
+
+    </div>
+
+    <!-- ================= 1+ DIAMOND REWARD POPUP MODAL (BLUE THEME) ================= -->
+    <div id="reward-modal" class="fixed inset-0 z-50 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 hidden">
+      <div class="bg-blue-600 text-white rounded-3xl p-6 w-full max-w-xs text-center space-y-4 shadow-2xl border-2 border-blue-400">
+        <div class="w-16 h-16 bg-white text-blue-600 rounded-full flex items-center justify-center mx-auto text-2xl shadow-lg animate-bounce">
+          <i class="fa-solid fa-gem"></i>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xl font-extrabold tracking-wide">1+ Diamond</div>
+          <p class="text-xs font-bold text-blue-100">ရယူမည်</p>
+        </div>
+        <button id="close-reward-btn" class="w-full bg-white text-blue-700 py-2.5 rounded-xl text-xs font-extrabold hover:bg-blue-50 transition shadow-md">
+          လက်ခံမည်
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= FAILED POPUP MODAL ================= -->
+    <div id="fail-modal" class="fixed inset-0 z-50 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 hidden">
+      <div class="bg-red-600 text-white rounded-3xl p-6 w-full max-w-xs text-center space-y-4 shadow-2xl border-2 border-red-400">
+        <div class="w-16 h-16 bg-white text-red-600 rounded-full flex items-center justify-center mx-auto text-2xl shadow-lg">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xl font-extrabold tracking-wide">ကျရှုံးသည်</div>
+          <p class="text-xs font-bold text-red-100">ကြော်ညာကို ၁၂ စက္ကန့်ပြည့်အောင် မကြည့်ရသေးပါ</p>
+        </div>
+        <button id="close-fail-btn" class="w-full bg-white text-red-700 py-2.5 rounded-xl text-xs font-extrabold hover:bg-red-50 transition shadow-md">
+          ပြန်ကြိုးစားမည်
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= SUCCESS POPUP MODAL ================= -->
+    <div id="ad-success-modal" class="fixed inset-0 z-50 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 hidden">
+      <div class="force-success-bg rounded-3xl p-6 w-full max-w-xs text-center space-y-4 shadow-2xl border-2 border-emerald-400">
+        <div class="w-16 h-16 bg-white text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl shadow-lg">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xl font-extrabold tracking-wide">အောင်မြင်သည်</div>
+          <p class="text-xs font-bold text-emerald-100">Diamond ၁ လုံး ရရှိသွားပါပြီ</p>
+        </div>
+        <button id="close-ad-success-btn" class="w-full bg-white text-emerald-700 py-2.5 rounded-xl text-xs font-extrabold hover:bg-emerald-50 transition shadow-md">
+          အတည်ပြုမည်
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= WITHDRAW POPUP MODAL ================= -->
+    <div id="withdraw-modal" class="fixed inset-0 z-50 bg-gray-900 bg-opacity-70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl p-6 w-full max-w-sm space-y-5 shadow-2xl relative max-h-[92vh] overflow-y-auto border border-gray-100">
+        
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-9 h-9 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-sm shadow-inner">
+              <i class="fa-solid fa-wallet"></i>
+            </div>
+            <h3 class="font-extrabold text-gray-900 text-base">ငွေထုတ်ရန်</h3>
+          </div>
+          <button id="close-modal-btn" class="w-8 h-8 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-700 flex items-center justify-center transition">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+
+        <!-- 1. KPAY SECTION -->
+        <div class="bg-gradient-to-br from-blue-50/70 to-indigo-50/50 border border-blue-100 rounded-2xl p-4 space-y-3.5 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <div class="w-7 h-7 bg-blue-600 text-white rounded-xl flex items-center justify-center text-xs font-bold shadow-sm">
+                <i class="fa-solid fa-k"></i>
+              </div>
+              <span class="text-xs font-extrabold text-blue-900 uppercase tracking-wide">KBZ Pay</span>
+            </div>
+            <div class="bg-white/80 border border-blue-200 px-2.5 py-1 rounded-xl shadow-xs flex items-center space-x-1">
+              <i class="fa-solid fa-gem text-cyan-500 text-[10px]"></i>
+              <span id="kpay-balance-text" class="text-[11px] font-extrabold text-blue-950">0/150000</span>
+            </div>
+          </div>
+
+          <div class="space-y-2.5">
+            <div>
+              <label class="block text-[11px] font-bold text-gray-600 mb-1 ml-0.5">Name</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">
+                  <i class="fa-solid fa-user"></i>
+                </span>
+                <input type="text" id="kpay-name" placeholder="အကောင့်နာမည်ထည့်ပါ" class="w-full text-xs pl-9 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white shadow-xs transition">
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-gray-600 mb-1 ml-0.5">ph no</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">
+                  <i class="fa-solid fa-phone"></i>
+                </span>
+                <input type="text" id="kpay-phone" placeholder="09xxxxxxxxx" class="w-full text-xs pl-9 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white shadow-xs transition">
+              </div>
+            </div>
+            <button id="submit-kpay-btn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 rounded-xl text-xs font-bold hover:from-blue-700 hover:to-indigo-700 transition shadow-md shadow-blue-500/20">
+              ထုတ်ယူမည် (Kpay)
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. WAVE SECTION -->
+        <div class="bg-gradient-to-br from-amber-50/70 to-yellow-50/50 border border-amber-100 rounded-2xl p-4 space-y-3.5 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <div class="w-7 h-7 bg-yellow-500 text-white rounded-xl flex items-center justify-center text-xs font-bold shadow-sm">
+                <i class="fa-solid fa-w"></i>
+              </div>
+              <span class="text-xs font-extrabold text-amber-900 uppercase tracking-wide">Wave Money</span>
+            </div>
+            <div class="bg-white/80 border border-amber-200 px-2.5 py-1 rounded-xl shadow-xs flex items-center space-x-1">
+              <i class="fa-solid fa-gem text-cyan-500 text-[10px]"></i>
+              <span id="wave-balance-text" class="text-[11px] font-extrabold text-amber-950">0/150000</span>
+            </div>
+          </div>
+
+          <div class="space-y-2.5">
+            <div>
+              <label class="block text-[11px] font-bold text-gray-600 mb-1 ml-0.5">Name</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">
+                  <i class="fa-solid fa-user"></i>
+                </span>
+                <input type="text" id="wave-name" placeholder="အကောင့်နာမည်ထည့်ပါ" class="w-full text-xs pl-9 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white shadow-xs transition">
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-gray-600 mb-1 ml-0.5">ph no</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs">
+                  <i class="fa-solid fa-phone"></i>
+                </span>
+                <input type="text" id="wave-phone" placeholder="09xxxxxxxxx" class="w-full text-xs pl-9 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white shadow-xs transition">
+              </div>
+            </div>
+            <button id="submit-wave-btn" class="w-full bg-gradient-to-r from-yellow-500 to-amber-500 text-white py-2.5 rounded-xl text-xs font-bold hover:from-yellow-600 hover:to-amber-600 transition shadow-md shadow-yellow-500/20">
+              ထုတ်ယူမည် (Wave)
+            </button>
+          </div>
+        </div>
+
+        <!-- Error/Success Message Container -->
+        <div id="withdraw-msg" class="text-center text-xs font-bold hidden py-1"></div>
+
+      </div>
+    </div>
+
+    <!-- ================= LOADING OVERLAY ================= -->
+    <div id="loading-modal" class="fixed inset-0 z-50 bg-gray-900 bg-opacity-70 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-2xl p-6 w-full max-w-xs text-center space-y-3 shadow-2xl">
+        <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <h3 class="font-bold text-gray-800 text-sm">ငွေထုတ်ယူနေပါသည်...</h3>
+        <p class="text-xs text-gray-500">ခဏစောင့်ပါ (၅ စက္ကန့်)</p>
+      </div>
+    </div>
+
+    <!-- ================= SUCCESS POPUP ================= -->
+    <div id="success-modal" class="fixed inset-0 z-50 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-2xl p-5 w-full max-w-xs text-center space-y-3 shadow-xl">
+        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <h3 class="font-bold text-emerald-700 text-base">ငွေထုတ် အောင်မြင်ပါသည်။</h3>
+        <p class="text-xs text-gray-500">သင့်ငွေထုတ်တောင်းဆိုမှုမှာ အောင်မြင်စွာ ပြီးမြောက်သွားပါပြီ။</p>
+        <button id="close-success-btn" class="w-full bg-emerald-600 text-white py-2 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">အတည်ပြုမည်</button>
+      </div>
+    </div>
+
+    <!-- ================= HISTORY POPUP MODAL ================= -->
+    <div id="history-modal" class="fixed inset-0 z-50 bg-gray-900 bg-opacity-60 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-2xl p-5 w-full max-w-xs space-y-3 shadow-xl max-h-[80vh] flex flex-col">
+        <div class="flex items-center justify-between border-b pb-2">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-xs font-bold">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 text-sm">ငွေထုတ်မှတ်တမ်း</h3>
+          </div>
+          <button id="close-history-btn" class="text-gray-400 hover:text-gray-600">
+            <i class="fa-solid fa-xmark text-base"></i>
+          </button>
+        </div>
+
+        <div id="history-list" class="flex-1 overflow-y-auto space-y-2 py-1">
+          <p class="text-center text-xs text-gray-400 py-6">မှတ်တမ်း မရှိသေးပါ။</p>
+        </div>
+
+        <button id="close-history-footer" class="w-full bg-gray-800 text-white py-2 rounded-xl text-xs font-bold hover:bg-gray-700 transition">ပိတ်မည်</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    let ytPlayer;
+    let watchTimer = null;
+    let watchSeconds = 0;
+    
+    // 1. LocalStorage မှ Diamond အရေအတွက်ကို ရယူခြင်း (မရှိပါက 0 အဖြစ် သတ်မှတ်)
+    let currentDiamonds = parseInt(localStorage.getItem("userDiamonds") || "0");
+    const targetBalance = 150000;
+
+    // ကြော်ညာလင့်ခ် ၇ ခု စာရင်း
+    const adLinks = [
+      "https://auctionr.org/4/d325d558ec7e707f2288d185ecc02eb7",
+      "https://auctionr.org/4/449e46c7df2151491fc4274faf822507",
+      "https://auctionr.org/4/603f24c31e29b262b242476c65b1f407",
+      "https://asiafilm.org/4/55b3e75dca240fbf579b5ce25111a1a3",
+      "https://asiafilm.org/4/f026e8179ec1c1dfbfa2cc01e7ad97f1",
+      "https://auctionr.org/4/972ecc590cc647fd787ec342b8f99d71",
+      "https://auctionr.org/4/868b5b0999a9ae22ffe83bc40845ada9"
+    ];
+
+    function getNextAdLink() {
+      let currentIndex = parseInt(localStorage.getItem("adLinkIndex") || "0");
+      const selectedLink = adLinks[currentIndex];
+      currentIndex = (currentIndex + 1) % adLinks.length;
+      localStorage.setItem("adLinkIndex", currentIndex.toString());
+      return selectedLink;
+    }
+
+    // 2. Diamond ပမာဏ ပြောင်းလဲတိုင်း LocalStorage သို့ သိမ်းဆည်းခြင်း
+    function updateDiamondDisplay() {
+      const diamondCountEl = document.getElementById("diamond-count");
+      const kpayBalanceEl = document.getElementById("kpay-balance-text");
+      const waveBalanceEl = document.getElementById("wave-balance-text");
+
+      if (diamondCountEl) diamondCountEl.textContent = currentDiamonds;
+      if (kpayBalanceEl) kpayBalanceEl.textContent = `${currentDiamonds}/${targetBalance}`;
+      if (waveBalanceEl) waveBalanceEl.textContent = `${currentDiamonds}/${targetBalance}`;
+
+      // LocalStorage သို့ Diamond ပမာဏ အသစ်သိမ်းဆည်းခြင်း
+      localStorage.setItem("userDiamonds", currentDiamonds.toString());
+    }
+
+    function onYouTubeIframeAPIReady() {
+      ytPlayer = new YT.Player('yt-player', {
+        videoId: 'dEwBGMjk4ec',
+        playerVars: {
+          'autoplay': 1,
+          'mute': 1,
+          'playsinline': 1,
+          'controls': 1,
+          'enablejsapi': 1
+        },
+        events: {
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        startTimer();
+      } else {
+        stopTimer();
+      }
+    }
+
+    function startTimer() {
+      if (!watchTimer) {
+        watchTimer = setInterval(() => {
+          watchSeconds++;
+          if (watchSeconds >= 80) {
+            watchSeconds = 0;
+            stopTimer();
+            showRewardModal();
+          }
+        }, 1000);
+      }
+    }
+
+    function stopTimer() {
+      if (watchTimer) {
+        clearInterval(watchTimer);
+        watchTimer = null;
+      }
+    }
+
+    function showRewardModal() {
+      const rewardModal = document.getElementById("reward-modal");
+      if (rewardModal) {
+        rewardModal.classList.remove("hidden");
+      }
+    }
+
+    function checkAdReturn() {
+      const adStartTime = localStorage.getItem("adStartTime");
+      if (adStartTime) {
+        localStorage.removeItem("adStartTime");
+        const elapsedTime = (Date.now() - parseInt(adStartTime)) / 1000;
+        
+        const failModal = document.getElementById("fail-modal");
+        const adSuccessModal = document.getElementById("ad-success-modal");
+
+        if (elapsedTime >= 12) {
+          if (adSuccessModal) adSuccessModal.classList.remove("hidden");
+        } else {
+          if (failModal) failModal.classList.remove("hidden");
+        }
+      }
+    }
+
+    window.addEventListener("focus", checkAdReturn);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        checkAdReturn();
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      updateDiamondDisplay();
+      checkAdReturn();
+
+      const splashScreen = document.getElementById("splash-screen");
+      const mainApp = document.getElementById("main-app");
+      const rewardModal = document.getElementById("reward-modal");
+      const closeRewardBtn = document.getElementById("close-reward-btn");
+      const failModal = document.getElementById("fail-modal");
+      const closeFailBtn = document.getElementById("close-fail-btn");
+      const adSuccessModal = document.getElementById("ad-success-modal");
+      const closeAdSuccessBtn = document.getElementById("close-ad-success-btn");
+
+      if (closeRewardBtn && rewardModal) {
+        closeRewardBtn.addEventListener("click", () => {
+          rewardModal.classList.add("hidden");
+          
+          localStorage.setItem("adStartTime", Date.now().toString());
+          const targetAdLink = getNextAdLink();
+          
+          window.open(targetAdLink, "_blank");
+        });
+      }
+
+      if (closeFailBtn && failModal) {
+        closeFailBtn.addEventListener("click", () => {
+          failModal.classList.add("hidden");
+          if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+        });
+      }
+
+      if (closeAdSuccessBtn && adSuccessModal) {
+        closeAdSuccessBtn.addEventListener("click", () => {
+          currentDiamonds += 1;
+          updateDiamondDisplay();
+          adSuccessModal.classList.add("hidden");
+          if (ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+        });
+      }
+
+      setTimeout(() => {
+        if (splashScreen) splashScreen.style.display = "none";
+        if (mainApp) mainApp.classList.remove("opacity-0");
+      }, 5000);
+
+      const currentTitle = document.getElementById("current-title");
+      const currentMeta = document.getElementById("current-meta");
+      const movieCards = document.querySelectorAll(".movie-card");
+
+      movieCards.forEach(card => {
+        card.addEventListener("click", () => {
+          const videoId = card.getAttribute("data-id");
+          const title = card.getAttribute("data-title");
+
+          if (ytPlayer && ytPlayer.loadVideoById) {
+            ytPlayer.loadVideoById(videoId);
+          }
+          if (currentTitle) {
+            currentTitle.textContent = title;
+          }
+          if (currentMeta) {
+            currentMeta.textContent = "YouTube Movie • ကြည့်ရှုနေဆဲ";
+          }
+
+          if (mainApp) {
+            mainApp.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        });
+      });
+
+      const bagMenuBtn = document.getElementById("bag-menu-btn");
+      const bagDropdown = document.getElementById("bag-dropdown");
+
+      if (bagMenuBtn && bagDropdown) {
+        bagMenuBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          bagDropdown.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", () => {
+          bagDropdown.classList.add("hidden");
+        });
+      }
+
+      const menuWithdraw = document.getElementById("menu-withdraw");
+      const withdrawModal = document.getElementById("withdraw-modal");
+      const closeModalBtn = document.getElementById("close-modal-btn");
+
+      const menuHistory = document.getElementById("menu-history");
+      const historyModal = document.getElementById("history-modal");
+      const closeHistoryBtn = document.getElementById("close-history-btn");
+      const closeHistoryFooter = document.getElementById("close-history-footer");
+
+      const loadingModal = document.getElementById("loading-modal");
+      const successModal = document.getElementById("success-modal");
+      const closeSuccessBtn = document.getElementById("close-success-btn");
+
+      const submitKpayBtn = document.getElementById("submit-kpay-btn");
+      const kpayNameInput = document.getElementById("kpay-name");
+      const kpayPhoneInput = document.getElementById("kpay-phone");
+
+      const submitWaveBtn = document.getElementById("submit-wave-btn");
+      const waveNameInput = document.getElementById("wave-name");
+      const wavePhoneInput = document.getElementById("wave-phone");
+
+      const withdrawMsg = document.getElementById("withdraw-msg");
+      const historyList = document.getElementById("history-list");
+
+      if (menuWithdraw && withdrawModal) {
+        menuWithdraw.addEventListener("click", () => {
+          bagDropdown.classList.add("hidden");
+          withdrawModal.classList.remove("hidden");
+          withdrawMsg.classList.add("hidden");
+        });
+      }
+
+      if (closeModalBtn && withdrawModal) {
+        closeModalBtn.addEventListener("click", () => {
+          withdrawModal.classList.add("hidden");
+        });
+      }
+
+      if (menuHistory && historyModal) {
+        menuHistory.addEventListener("click", () => {
+          bagDropdown.classList.add("hidden");
+          historyModal.classList.remove("hidden");
+          renderHistory();
+        });
+      }
+
+      if (closeHistoryBtn && historyModal) {
+        closeHistoryBtn.addEventListener("click", () => {
+          historyModal.classList.add("hidden");
+        });
+      }
+
+      if (closeHistoryFooter && historyModal) {
+        closeHistoryFooter.addEventListener("click", () => {
+          historyModal.classList.add("hidden");
+        });
+      }
+
+      // 3. LocalStorage မှ ငွေထုတ်မှတ်တမ်းများကို ဖတ်ရှုခြင်း
+      let withdrawHistory = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
+
+      function renderHistory() {
+        if (withdrawHistory.length === 0) {
+          historyList.innerHTML = `<p class="text-center text-xs text-gray-400 py-6">မှတ်တမ်း မရှိသေးပါ။</p>`;
+          return;
+        }
+
+        historyList.innerHTML = "";
+        withdrawHistory.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-xs space-y-1";
+          div.innerHTML = `
+            <div class="flex justify-between font-bold text-gray-800">
+              <span>${item.name} (${item.wallet.toUpperCase()})</span>
+              <span class="text-cyan-600 flex items-center space-x-1">
+                <i class="fa-solid fa-gem text-xs"></i>
+                <span>150,000 Diamond</span>
+              </span>
+            </div>
+            <div class="text-gray-500 text-[11px]">ဖုန်း: ${item.phone}</div>
+            <div class="text-gray-400 text-[10px] text-right">${item.time}</div>
+          `;
+          historyList.appendChild(div);
+        });
+      }
+
+      function processWithdraw(walletType, name, phone) {
+        if (currentDiamonds < targetBalance) {
+          withdrawMsg.textContent = "Diamond ပမာဏ 150,000 မပြည့်သေးပါ!";
+          withdrawMsg.className = "text-center text-xs font-bold text-red-500";
+          withdrawMsg.classList.remove("hidden");
+          return;
+        }
+
+        if (!name || !phone) {
+          withdrawMsg.textContent = "ကျေးဇူးပြု၍ Name နှင့် ph no ဖြည့်ပါ။";
+          withdrawMsg.className = "text-center text-xs font-bold text-red-500";
+          withdrawMsg.classList.remove("hidden");
+          return;
+        }
+
+        withdrawModal.classList.add("hidden");
+        loadingModal.classList.remove("hidden");
+
+        setTimeout(() => {
+          loadingModal.classList.add("hidden");
+          successModal.classList.remove("hidden");
+
+          currentDiamonds -= targetBalance;
+          updateDiamondDisplay();
+
+          const now = new Date();
+          const timeString = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+          
+          withdrawHistory.unshift({
+            wallet: walletType,
+            name: name,
+            phone: phone,
+            time: timeString
+          });
+
+          // 4. ငွေထုတ်မှတ်တမ်းအသစ်ကို LocalStorage သို့ သိမ်းဆည်းခြင်း
+          localStorage.setItem("withdrawHistory", JSON.stringify(withdrawHistory));
+
+          kpayNameInput.value = "";
+          kpayPhoneInput.value = "";
+          waveNameInput.value = "";
+          wavePhoneInput.value = "";
+        }, 5000);
+      }
+
+      if (submitKpayBtn) {
+        submitKpayBtn.addEventListener("click", () => {
+          processWithdraw("kpay", kpayNameInput.value.trim(), kpayPhoneInput.value.trim());
+        });
+      }
+
+      if (submitWaveBtn) {
+        submitWaveBtn.addEventListener("click", () => {
+          processWithdraw("wave", waveNameInput.value.trim(), wavePhoneInput.value.trim());
+        });
+      }
+
+      if (closeSuccessBtn && successModal) {
+        closeSuccessBtn.addEventListener("click", () => {
+          successModal.classList.add("hidden");
+        });
+      }
+    });
+  </script>
+</body>
+</html>
